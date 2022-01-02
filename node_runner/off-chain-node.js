@@ -147,18 +147,34 @@ function on_contract_event(event, is_new) {
 // retrieve past events from the timer contract
 async function get_past_events() {
 
-  const last_block = get_last_block()
+  var  start_block = get_last_processed_block()
+  const last_block = await get_last_blockchain_block()
 
-  console.log("reading past events... starting at block", last_block)
+  console.log("reading past events...")
 
-  const events = await aergo.getEvents({
-    address: contract_address,
-    blockfrom: last_block
-  })
+  while (start_block < last_block) {
+    var end_block = start_block + 10000
+    if (end_block > last_block) end_block = 0  //last_block
 
-  events.forEach(function(event){
-    on_contract_event(event, false)
-  })
+    console.log("from block", start_block, "to block", (end_block > 0 ? end_block : '(last)'))
+
+    // retrieve the events from this range
+    const events = await aergo.getEvents({
+      address: contract_address,
+      blockfrom: start_block,
+      blockto: end_block
+    })
+
+    // sort the events by the block number
+    events.sort((a, b) => a.blockno - b.blockno)
+
+    // process each event
+    events.forEach(function(event){
+      on_contract_event(event, false)
+    })
+
+    start_block += 10000
+  }
 
 }
 
@@ -178,16 +194,21 @@ async function subscribe_to_events() {
 
 }
 
+async function get_last_blockchain_block() {
+  const blockchainState = await aergo.blockchain();
+  return blockchainState.bestHeight
+}
+
 async function update_block_height() {
   const blockchainState = await aergo.blockchain();
   console.log("current block:", blockchainState.bestHeight);
-  fs.writeFileSync(__dirname + '/last_known_block.txt', blockchainState.bestHeight.toString());
+  fs.writeFileSync(__dirname + '/last_processed_block.txt', blockchainState.bestHeight.toString());
   setTimeout(update_block_height, 180 * 1000);  // 3 minutes
 }
 
-function get_last_block() {
+function get_last_processed_block() {
   try {
-    var block_height = fs.readFileSync(__dirname + '/last_known_block.txt').toString();
+    var block_height = fs.readFileSync(__dirname + '/last_processed_block.txt').toString();
     return parseInt(block_height)
   } catch (err) {
     return MIN_BLOCK

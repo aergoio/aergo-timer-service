@@ -8,6 +8,7 @@ const aergo = new client.AergoClient({}, new client.GrpcProvider({url: 'testnet-
 // This is the address of the Aergo Timer contract
 const contract_address = "Amhs1ivmaJco4vyVYgZFjFYnit47RukSFeeBd5iNP5iPFB2YbBiN"
 const MIN_BLOCK = 83902017
+const gas_price = 5  // 50000000000
 
 var chainIdHash
 var identity
@@ -39,12 +40,14 @@ try {
 console.log('account address:', identity.address);
 
 // call the Aergo Timer smart contract
-async function call_timer(timer_id) {
+async function call_timer(timer_id, payment) {
+
+  var gas_limit = Math.round(payment / gas_price * 100000)
 
   account.nonce += 1
 
   const tx = {
-    type: 5,  // call
+    type: 5,  // contract call
     nonce: account.nonce,
     from: identity.address,
     to: contract_address,
@@ -53,6 +56,7 @@ async function call_timer(timer_id) {
       "Args": [timer_id]
     }),
     amount: '0 aer',
+    limit: gas_limit,
     chainIdHash: chainIdHash
   };
 
@@ -84,7 +88,7 @@ async function call_timer(timer_id) {
   }
 
   // prepare the database
-  db.exec("CREATE TABLE IF NOT EXISTS timers (id INTEGER PRIMARY KEY, fire_time INTEGER)")
+  db.exec("CREATE TABLE IF NOT EXISTS timers (id INTEGER PRIMARY KEY, fire_time INTEGER, payment INTEGER)")
   db.exec("CREATE INDEX IF NOT EXISTS timers_fire_time ON timers (fire_time)")
 
   // get the past events
@@ -102,11 +106,11 @@ async function call_timer(timer_id) {
 })();
 
 
-function on_new_timer(timer_id, fire_time) {
+function on_new_timer(timer_id, fire_time, payment) {
 
   // insert it on the database
-  const stmt = db.prepare("INSERT INTO timers VALUES (?,?)")
-  stmt.run(timer_id, fire_time)
+  const stmt = db.prepare("INSERT INTO timers VALUES (?,?,?)")
+  stmt.run(timer_id, fire_time, payment)
 
 }
 
@@ -126,7 +130,8 @@ function on_contract_event(event, is_new) {
   switch (event.eventName) {
     case "new_timer":
       var fire_time = parseInt(event.args[1])
-      on_new_timer(timer_id, fire_time)
+      var payment   = parseInt(event.args[2])
+      on_new_timer(timer_id, fire_time, payment)
       break
     case "processed":
       on_timer_processed(timer_id)
@@ -194,7 +199,7 @@ function process_timer() {
   console.log("processing timer", timer.id, "...")
 
   // call the smart contract
-  call_timer(timer.id)
+  call_timer(timer.id, timer.payment)
 
   // remove it from the database
   on_timer_processed(timer.id)
@@ -214,9 +219,10 @@ function schedule_first_call() {
   }
 
   // get the first timer to be fired, from the database
-  timer = db.prepare("SELECT id, fire_time FROM timers ORDER BY fire_time LIMIT 1").get()
+  timer = db.prepare("SELECT * FROM timers ORDER BY fire_time LIMIT 1").get()
   if (timer) {
-    console.log("next timer - id:", timer.id, " fire_time:", timer.fire_time);
+    console.log("next timer - id:", timer.id, "fire_time:", timer.fire_time,
+                "payment:", timer.payment);
   } else {
     return
   }

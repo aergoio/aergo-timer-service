@@ -4,7 +4,7 @@ Create timers to call functions on your smart contracts
 
 Schedule calls based on time interval or on specific date-times
 
-For a small fee (currently 0.1 AERGO) per call
+For a small fee (minimum 0.01 AERGO) per call
 
 The Aergo Timer Service is a **trustless** service that uses off-chain nodes to interface with the Aergo blockchain
 
@@ -17,7 +17,7 @@ Add these 2 lines at the top of your contract:
 
 ```lua
 timer = "Amhs1ivmaJco4vyVYgZFjFYnit47RukSFeeBd5iNP5iPFB2YbBiN"
-call_price = "100000000000000000"
+call_price = "10000000000000000" -- 0.01 aergo = minimum
 ```
 
 They define the address of the Timer contract and the price for a single call
@@ -70,6 +70,13 @@ contract.call.value(call_price)(timer, "start", "on 1665826200", "contract_end",
 ```
 
 There is also an [example contract](example/caller.lua)
+
+
+## Call Fees
+
+Although 0.01 aergo is sufficient for most calls, if your contract uses too much gas it will need to pay a higher amount for each call. You can call your contract function directly and check how much was the fee, then add 20% or more to the amount and use this value as the `call_price` on your contract.
+
+The last 15 characters from the price must be zero.
 
 
 ## Node Runners

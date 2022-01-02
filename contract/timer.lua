@@ -2,12 +2,10 @@ state.var {
   last_timer_id = state.value(),
   timers = state.map()
 }
+            -- 0.123456789012345678
+call_price_str = "10000000000000000"  -- 0.01 AERGO
+call_price_aergo = "0.01 aergo"
 
---                123456789012345678
-call_price_str = "100000000000000000"  -- 0.1 AERGO
-call_price_aergo = "0.1 aergo"
-
--- this must be blocked from external call
 function constructor()
   last_timer_id:set(0)
 end
@@ -16,7 +14,7 @@ function start(interval, callback, args)
 
   local call_price = bignum.number(call_price_str)
 
-  -- check the payment for this call: node reward + txn cost
+  -- check the payment for this call
   local amount_str = system.getAmount()
   local amount = bignum.number(amount_str)
   assert(bignum.compare(amount, call_price) >= 0, "the minimum call price is " .. call_price_aergo .. " (" .. call_price_str  .. ")")
@@ -51,7 +49,9 @@ function start(interval, callback, args)
   timers[timer_id] = info
 
   -- notify the listening off-chain nodes
-  contract.event("new_timer", timer_id, fire_time)
+  -- discard the last 15 chars from the payment
+  local payment = tonumber(amount_str:sub(1, #amount_str - 15))
+  contract.event("new_timer", timer_id, fire_time, payment)
 
   return timer_id
 end
@@ -103,17 +103,8 @@ function fire_timer(timer_id)
   -- issue an event
   contract.event("processed", timer_id)
 
-  -- reward the caller
-  --local node_payment = call_price + txn_cost
-  contract.send(system.getOrigin(), call_price_str)
-
-  -- return the remainder to the contract
-  local amount = bignum.number(info["amount"])
-  local call_price = bignum.number(call_price_str)
-  local remainder = amount - call_price
-  if not bignum.iszero(remainder) then
-    contract.send(info["address"], tostring(remainder))
-  end
+  -- pay the node
+  contract.send(system.getOrigin(), info["amount"])
 
 end
 

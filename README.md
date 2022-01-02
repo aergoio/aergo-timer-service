@@ -1,12 +1,12 @@
-# Aergo Timer Service
+# Aergo Timer Service ⏰
 
-schedule smart contract function calls
+Create timers to call functions on your smart contracts
 
-Your smart contract can schedule calls to its functions in the future
+Schedule calls based on time interval or on specific date-times
 
-It is possible to pass an argument
+For a small fee (currently 0.1 AERGO) per call
 
-Pay for the call
+The Aergo Timer Service is a **trustless** service that uses off-chain nodes to interface with the Aergo blockchain
 
 
 ## How To Use It
@@ -28,16 +28,16 @@ They define the address of the Timer contract and the price for a single call
 Create the function that should be called, with a single argument, and add this line of code at the beginning to limit who can call it:
 
 ```lua
-  assert(system.getSender() == timer, "only the timer contract can call this function")
+assert(system.getSender() == timer, "only the timer contract can call this function")
 ```
 
 
 ### Step 3
 
-Create a timer using this:
+Create a timer using this line:
 
 ```lua
-  contract.call.value(call_price)(timer, "start", interval, callback, argument)
+contract.call.value(call_price)(timer, "start", interval, callback, argument)
 ```
 
 The `interval` can be:
@@ -49,24 +49,24 @@ The `callback` is the name of the function that should be called on the contract
 
 It is possible to pass an `argument` to the callback function. If you need to pass many, just serialize them as a string and deserialize on the callback.
 
-Here are some examples:
+#### Examples:
 
 1. This one creates a timer to be executed within 30 seconds:
 
 ```lua
-  contract.call.value(call_price)(timer, "start", 30, "on_timer", arg)
+contract.call.value(call_price)(timer, "start", 30, "on_timer", arg)
 ```
 
 2. This one creates a timer to be executed within 2 days (172800 seconds):
 
 ```lua
-  contract.call.value(call_price)(timer, "start", 172800, "on_deadline", arg)
+contract.call.value(call_price)(timer, "start", 172800, "on_deadline", arg)
 ```
 
 3. This one creates a timer to be executed on 2022-10-15 09:30:00 UTC (Unix timestamp 1665826200):
 
 ```lua
-  contract.call.value(call_price)(timer, "start", "on 1665826200", "contract_end", arg)
+contract.call.value(call_price)(timer, "start", "on 1665826200", "contract_end", arg)
 ```
 
 There is also an [example contract](example/caller.lua)

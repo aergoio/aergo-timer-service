@@ -74,9 +74,11 @@ There is also an [example contract](example/caller.lua)
 
 ## Call Fees
 
-Although 0.01 aergo is sufficient for most calls, if your contract uses too much gas it will need to pay a higher amount for each call. You can call your contract function directly and check how much was the fee, then add 20% or more to the amount and use this value as the `call_price` on your contract.
+Although 0.01 aergo is sufficient for most calls, if your contract uses too much gas it will need to pay a higher amount for each call. You can call your contract function directly and check how much was the fee, then add 30% or more to the amount and use this value as the `call_price` on your contract.
 
 The last 15 characters from the price must be zero.
+
+> :warning: The call will **NOT** happen if the amount paid is lower than what is required to execute the function call!
 
 
 ## Node Runners

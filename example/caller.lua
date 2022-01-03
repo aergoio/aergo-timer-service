@@ -2,8 +2,8 @@ state.var {
   var = state.value()
 }
 
-timer = "Amhs1ivmaJco4vyVYgZFjFYnit47RukSFeeBd5iNP5iPFB2YbBiN"
-call_price = "100000000000000000"
+timer = "Amg4JPhdKoPbeqjBvUTX2i6Z9z8t5uV2NiCEnYdWQLyusf9ocepf"
+call_price = "10000000000000000" -- 0.01 aergo = minimum
 
 function on_timer(arg)
 

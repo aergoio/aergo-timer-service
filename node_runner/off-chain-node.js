@@ -1,13 +1,17 @@
 const client = require('@herajs/client');
 const crypto = require('@herajs/crypto');
 const sqlite3 = require('better-sqlite3');
+const process = require('process');
 const fs = require('fs');
 
-const aergo = new client.AergoClient({}, new client.GrpcProvider({url: 'testnet-api.aergo.io:7845'}));
-
 // This is the address of the Aergo Timer contract
-const contract_address = "Amhs1ivmaJco4vyVYgZFjFYnit47RukSFeeBd5iNP5iPFB2YbBiN"
-const MIN_BLOCK = 83902017
+const contract_address_testnet = "Amg4JPhdKoPbeqjBvUTX2i6Z9z8t5uV2NiCEnYdWQLyusf9ocepf"
+const contract_address_mainnet = "AmgVFEHns9wAXuJAtN8hHdFGzkzknRiyH3cYVLkEUT8fewoerzYv"
+var   contract_address
+const MIN_BLOCK_TESTNET = 83993612
+const MIN_BLOCK_MAINNET = 85586293
+var   min_block
+var   network_address
 const gas_price = 5  // 50000000000
 
 var chainIdHash
@@ -16,6 +20,29 @@ var account
 
 var timer
 var timeout_id = 0
+
+// read the command line argument
+const args = process.argv.slice(2)
+if (args.length == 0 || (args[0] != 'testnet' && args[0] != 'mainnet')) {
+  var path = require("path");
+  var file = path.basename(process.argv[1])
+  console.log("usage:")
+  console.log("node", file, "testnet")
+  console.log(" or")
+  console.log("node", file, "mainnet")
+  process.exit(1)
+}
+if (args[0] == 'mainnet') {
+  contract_address = contract_address_mainnet
+  min_block = MIN_BLOCK_MAINNET
+  network_address = 'mainnet-api.aergo.io:7845'
+} else {
+  contract_address = contract_address_testnet
+  min_block = MIN_BLOCK_TESTNET
+  network_address = 'testnet-api.aergo.io:7845'
+}
+
+const aergo = new client.AergoClient({}, new client.GrpcProvider({url: network_address}));
 
 // store the timers on a local database, sorted by fire time
 const db = new sqlite3('timers.db', { verbose: console.log })
@@ -32,7 +59,6 @@ try {
     fs.writeFileSync(__dirname + '/account.json', identity.privateKey)
   } else {
     console.error(err)
-    var process = require('process')
     process.exit(1)
   }
 }
@@ -78,7 +104,7 @@ async function call_timer(timer_id, payment) {
   //nonce = await aergo.getNonce(identity.address)
   account = await aergo.getState(identity.address)
 
-  if (account.balance == 0) {
+  if (account.balance.value == 0) {
     console.log("--------------------------------------")
     console.log("     Account with zero balance!       ")
     console.log("Insert Aergo tokens on the account and")
@@ -211,7 +237,7 @@ function get_last_processed_block() {
     var block_height = fs.readFileSync(__dirname + '/last_processed_block.txt').toString();
     return parseInt(block_height)
   } catch (err) {
-    return MIN_BLOCK
+    return min_block
   }
 }
 

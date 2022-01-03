@@ -33,13 +33,15 @@ if (args.length == 0 || (args[0] != 'testnet' && args[0] != 'mainnet')) {
   process.exit(1)
 }
 if (args[0] == 'mainnet') {
+  console.log('running on mainnet')
+  network_address = 'mainnet-api.aergo.io:7845'
   contract_address = contract_address_mainnet
   min_block = MIN_BLOCK_MAINNET
-  network_address = 'mainnet-api.aergo.io:7845'
 } else {
+  console.log('running on testnet')
+  network_address = 'testnet-api.aergo.io:7845'
   contract_address = contract_address_testnet
   min_block = MIN_BLOCK_TESTNET
-  network_address = 'testnet-api.aergo.io:7845'
 }
 
 const aergo = new client.AergoClient({}, new client.GrpcProvider({url: network_address}));

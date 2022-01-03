@@ -115,12 +115,20 @@ npm install better-sqlite3 @herajs/client @herajs/crypto
 To start it manually:
 
 ```
-node off-chain-node.js
+node off-chain-node.js testnet
 ```
 
 It is recommended to run it as a service, so it is restarted on failure.
 One example using `pm2`:
 
 ```
-pm2 start off-chain-node.js
+pm2 start off-chain-node.js -- testnet
 ```
+
+For mainnet:
+
+```
+pm2 start off-chain-node.js -- mainnet
+```
+
+If you plan to run nodes for both networks, create a copy of the folder, rename the js file (they must be different on pm2) and run them separately.

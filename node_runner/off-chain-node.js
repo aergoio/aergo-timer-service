@@ -20,6 +20,7 @@ var account
 
 var timer
 var timeout_id = 0
+var time_offset = 0
 
 // read the command line argument
 const args = process.argv.slice(2)
@@ -96,6 +97,13 @@ async function call_timer(timer_id, payment) {
   const txReceipt = await aergo.waitForTransactionReceipt(txhash);
 
   console.log("transaction receipt:", txReceipt)
+
+  if (txReceipt.result.indexOf("this timer can only be fired after") > -1) {
+    return false
+  } else {
+    return true
+  }
+
 }
 
 
@@ -248,10 +256,16 @@ function process_timer() {
   console.log("processing timer", timer.id, "...")
 
   // call the smart contract
-  call_timer(timer.id, timer.payment)
+  const success = call_timer(timer.id, timer.payment)
 
-  // remove it from the database
-  on_timer_processed(timer.id)
+  if (success) {
+    // remove it from the database
+    on_timer_processed(timer.id)
+  } else {
+    // this device's time is not synchronized
+    // increase the time_offset to compensate
+    time_offset += 2
+  }
 
   // schedule the next call
   timeout_id = 0
@@ -278,7 +292,7 @@ function schedule_first_call() {
 
   // calculate the time to wait from now
   const now = Math.floor(new Date().getTime() / 1000)
-  const wait_time = timer.fire_time - now
+  const wait_time = timer.fire_time - now + time_offset
 
   if (wait_time > 0) {
     console.log("firing at", wait_time, "seconds from now:", now)

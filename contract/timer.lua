@@ -95,12 +95,13 @@ function fire_timer(timer_id)
   -- check if it can be fired now, using the current time
   assert(system.getTimestamp() >= info["time"], "this timer can only be fired after " .. info["time"])
 
+  -- update the state BEFORE any external call to avoid reentrancy attack
+  -- remove the timer
+  timers:delete(timer_id)
+
   -- fire the callback
   -- contract.call(info["address"], info["callback"], info["args"])
   contract.pcall(contract.call, info["address"], info["callback"], info["args"])
-
-  -- remove the timer
-  timers:delete(timer_id)
 
   -- issue an event
   contract.event("processed", timer_id)

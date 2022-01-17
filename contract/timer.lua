@@ -12,6 +12,8 @@ end
 
 function start(interval, callback, args)
 
+  assert(system.getSender() ~= system.getOrigin(), "the timer is intended to be used by other contracts")
+
   local call_price = bignum.number(call_price_str)
 
   -- check the payment for this call

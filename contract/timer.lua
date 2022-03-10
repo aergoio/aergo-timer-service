@@ -101,10 +101,10 @@ function fire_timer(timer_id)
 
   -- fire the callback
   -- contract.call(info["address"], info["callback"], info["args"])
-  contract.pcall(contract.call, info["address"], info["callback"], info["args"])
+  local success, result = pcall(contract.call, info["address"], info["callback"], info["args"])
 
   -- issue an event
-  contract.event("processed", timer_id)
+  contract.event("processed", timer_id, success, result)
 
   -- pay the node
   contract.send(system.getOrigin(), info["amount"])

@@ -46,7 +46,7 @@ assert(system.getSender() == timer, "only the timer contract can call this funct
 Create a timer using this line:
 
 ```lua
-contract.call.value(call_price)(timer, "start", interval, callback, arguments...)
+contract.call.value(call_price)(timer, "new", interval, callback, arguments...)
 ```
 
 The `interval` can be:
@@ -63,19 +63,19 @@ It is possible to pass `arguments` to the callback function.
 1. This one creates a timer to be executed within 30 seconds:
 
 ```lua
-contract.call.value(call_price)(timer, "start", 30, "on_timer", arg1, arg2)
+contract.call.value(call_price)(timer, "new", 30, "on_timer", arg1, arg2)
 ```
 
 2. This one creates a timer to be executed within 2 days (172800 seconds):
 
 ```lua
-contract.call.value(call_price)(timer, "start", 172800, "on_deadline", arg)
+contract.call.value(call_price)(timer, "new", 172800, "on_deadline", arg)
 ```
 
 3. This one creates a timer to be executed on 2022-10-15 09:30:00 UTC (Unix timestamp 1665826200):
 
 ```lua
-contract.call.value(call_price)(timer, "start", "on 1665826200", "contract_end")
+contract.call.value(call_price)(timer, "new", "on 1665826200", "contract_end")
 ```
 
 There is also an [example contract](example/caller.lua)

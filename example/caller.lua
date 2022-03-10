@@ -21,7 +21,7 @@ function use_timer(interval, arg)
 
   var:set("empty")
 
-  contract.call.value(call_price)(timer, "start", interval, "on_timer", arg)
+  contract.call.value(call_price)(timer, "new", interval, "on_timer", arg)
 
 end
 

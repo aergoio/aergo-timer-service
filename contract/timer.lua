@@ -58,7 +58,7 @@ local function new_timer(caller, amount, interval, callback, ...)
 end
 
 -- native aergo tokens
-function start(interval, callback, ...)
+function new(interval, callback, ...)
   local caller = system.getSender()
   local amount = bignum.number(system.getAmount())
 
@@ -134,5 +134,5 @@ function default()
   -- used to receive aergo tokens (unwrap waergo)
 end
 
-abi.payable(start, default)
-abi.register(start, stop, fire_timer, tokensReceived)
+abi.payable(new, default)
+abi.register(new, stop, fire_timer, tokensReceived)

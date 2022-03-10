@@ -2,8 +2,12 @@ state.var {
   var = state.value()
 }
 
-timer = "Amg4JPhdKoPbeqjBvUTX2i6Z9z8t5uV2NiCEnYdWQLyusf9ocepf"
+timer = "AmhWD5WtbScVHWS2N4Rhy6CHCm4AVGjzA1HyDywUfnrURSHvHgAh"
 call_price = "10000000000000000" -- 0.01 aergo = minimum
+
+function get_value()
+  return var:get()
+end
 
 function on_timer(arg)
 
@@ -21,20 +25,23 @@ function use_timer(interval, arg)
 
 end
 
+function use_timer2(waergo, interval, arg)
+
+  var:set("empty")
+
+  contract.call(waergo, "transfer", timer, call_price, interval, "on_timer", arg)
+
+end
+
 function transfer()
   -- do nothing, only receive tokens
 end
 
+-- wrapped aergo (waergo) ARC1 tokens
+function tokensReceived(operator, from, amount, ...)
+
+end
+
 abi.payable(transfer)
-abi.register(use_timer, on_timer)
-
-
---[[
-
-Available Lua modules:
-  string  math  table  bit
-
-Available Aergo modules:
-  system  contract  db  crypto  bignum  json
-
-]]
+abi.register(use_timer, use_timer2, on_timer, tokensReceived)
+abi.register_view(get_value)

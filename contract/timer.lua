@@ -10,16 +10,15 @@ function constructor()
   last_timer_id:set(0)
 end
 
-function start(interval, callback, ...)
+local function new_timer(caller, amount, interval, callback, ...)
 
-  assert(system.getSender() ~= system.getOrigin(), "the timer is intended to be used by other contracts")
+  assert(caller ~= system.getOrigin(), "the timer is intended to be used by other contracts")
 
   local call_price = bignum.number(call_price_str)
 
   -- check the payment for this call
-  local amount_str = system.getAmount()
-  local amount = bignum.number(amount_str)
-  assert(bignum.compare(amount, call_price) >= 0, "the minimum call price is " .. call_price_aergo .. " (" .. call_price_str  .. ")")
+  assert(amount >= call_price, "the minimum call price is " .. call_price_aergo .. " (" .. call_price_str  .. ")")
+  local amount_str = bignum.tostring(amount)
 
   -- check the time interval for the call
   local fire_time = 0
@@ -37,7 +36,7 @@ function start(interval, callback, ...)
 
   local info = {
     time = fire_time,
-    address = system.getSender(),   -- should it allow a contract to register callback on another?
+    address = caller,   -- should it allow a contract to register callback on another?
     callback = callback,
     args = {...},
     amount = amount_str
@@ -56,6 +55,26 @@ function start(interval, callback, ...)
   contract.event("new_timer", timer_id, fire_time, payment)
 
   return timer_id
+end
+
+-- native aergo tokens
+function start(interval, callback, ...)
+  local caller = system.getSender()
+  local amount = bignum.number(system.getAmount())
+
+  return new_timer(caller, amount, interval, callback, ...)
+end
+
+-- wrapped aergo (waergo) ARC1 tokens
+function tokensReceived(operator, from, amount, ...)
+  local token = system.getSender()
+
+  local before = bignum.number(contract.balance())
+  contract.call(token, "unwrap", amount)
+  local amount2 = bignum.number(contract.balance()) - before
+  assert(amount2 == amount, "invalid amount")
+
+  return new_timer(from, amount, ...)
 end
 
 function stop(timer_id)
@@ -111,15 +130,9 @@ function fire_timer(timer_id)
 
 end
 
-abi.payable(start)
-abi.register(start, stop, fire_timer)
+function default()
+  -- used to receive aergo tokens (unwrap waergo)
+end
 
---[[
-
-Available Lua modules:
-  string  math  table  bit
-
-Available Aergo modules:
-  system  contract  db  crypto  bignum  json
-
-]]
+abi.payable(start, default)
+abi.register(start, stop, fire_timer, tokensReceived)

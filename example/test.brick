@@ -1,0 +1,6 @@
+inject ac 1000000000000000000
+deploy ac 0 timer ../contract/timer.lua
+deploy ac 0 caller caller.lua
+deploy ac 0 waergo ../../wrapped-aergo/output.lua
+call ac 15000000000000000 waergo wrap_to `["AmggmgtWPXtsDkC5hkYYx2iYaWfGs8D4ZvZNwxwdm4gxGSDaCqKn"]`
+call ac 0 caller use_timer2 `["AmgPir5CYRZhu8Ny6LaNLbcKeqkiCQEgLSrfiKLPUBqXDt7rtWGB",5,"wow"]`

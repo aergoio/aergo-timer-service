@@ -10,7 +10,7 @@ function constructor()
   last_timer_id:set(0)
 end
 
-function start(interval, callback, args)
+function start(interval, callback, ...)
 
   assert(system.getSender() ~= system.getOrigin(), "the timer is intended to be used by other contracts")
 
@@ -39,7 +39,7 @@ function start(interval, callback, args)
     time = fire_time,
     address = system.getSender(),   -- should it allow a contract to register callback on another?
     callback = callback,
-    args = args,
+    args = {...},
     amount = amount_str
   }
 
@@ -100,8 +100,8 @@ function fire_timer(timer_id)
   timers:delete(timer_id)
 
   -- fire the callback
-  -- contract.call(info["address"], info["callback"], info["args"])
-  local success, result = pcall(contract.call, info["address"], info["callback"], info["args"])
+  -- contract.call(info["address"], info["callback"], unpack(info["args"]))
+  local success, result = pcall(contract.call, info["address"], info["callback"], unpack(info["args"]))
 
   -- issue an event
   contract.event("processed", timer_id, success, result)

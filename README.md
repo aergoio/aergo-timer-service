@@ -34,7 +34,7 @@ They define the address of the Timer contract and the price for a single call
 
 ### Step 2
 
-Create the function that should be called, with a single argument, and add this line of code at the beginning to limit who can call it:
+Create the function that should be called (it can have arguments) and add this line of code at the beginning to limit who can call it:
 
 ```lua
 assert(system.getSender() == timer, "only the timer contract can call this function")
@@ -46,7 +46,7 @@ assert(system.getSender() == timer, "only the timer contract can call this funct
 Create a timer using this line:
 
 ```lua
-contract.call.value(call_price)(timer, "start", interval, callback, argument)
+contract.call.value(call_price)(timer, "start", interval, callback, arguments...)
 ```
 
 The `interval` can be:
@@ -56,14 +56,14 @@ The `interval` can be:
 
 The `callback` is the name of the function that should be called on the contract (from step 2).
 
-It is possible to pass an `argument` to the callback function. If you need to pass many, just serialize them as a string and deserialize on the callback.
+It is possible to pass `arguments` to the callback function.
 
 #### Examples:
 
 1. This one creates a timer to be executed within 30 seconds:
 
 ```lua
-contract.call.value(call_price)(timer, "start", 30, "on_timer", arg)
+contract.call.value(call_price)(timer, "start", 30, "on_timer", arg1, arg2)
 ```
 
 2. This one creates a timer to be executed within 2 days (172800 seconds):
@@ -75,7 +75,7 @@ contract.call.value(call_price)(timer, "start", 172800, "on_deadline", arg)
 3. This one creates a timer to be executed on 2022-10-15 09:30:00 UTC (Unix timestamp 1665826200):
 
 ```lua
-contract.call.value(call_price)(timer, "start", "on 1665826200", "contract_end", arg)
+contract.call.value(call_price)(timer, "start", "on 1665826200", "contract_end")
 ```
 
 There is also an [example contract](example/caller.lua)

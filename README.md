@@ -18,14 +18,14 @@ Add these 2 lines at the top of your contract:
 For `testnet`:
 
 ```lua
-timer = "Amg4JPhdKoPbeqjBvUTX2i6Z9z8t5uV2NiCEnYdWQLyusf9ocepf"
+timer = "Amgujys9e7xKhpkjy2pjz3VyCahr3F16gRAmy9YgGHRPWsUt5J4x"
 call_price = "10000000000000000" -- 0.01 aergo = minimum
 ```
 
 For `mainnet`:
 
 ```lua
-timer = "AmgVFEHns9wAXuJAtN8hHdFGzkzknRiyH3cYVLkEUT8fewoerzYv"
+timer = "AmgEcXX3mFV2hmgYPszSC3sPn6ohjV9UaWp8cfcwKSurdH8TZmDX"
 call_price = "10000000000000000" -- 0.01 aergo = minimum
 ```
 

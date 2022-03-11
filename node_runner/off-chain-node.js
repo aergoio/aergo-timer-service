@@ -5,11 +5,11 @@ const process = require('process');
 const fs = require('fs');
 
 // This is the address of the Aergo Timer contract
-const contract_address_testnet = "Amg4JPhdKoPbeqjBvUTX2i6Z9z8t5uV2NiCEnYdWQLyusf9ocepf"
-const contract_address_mainnet = "AmgVFEHns9wAXuJAtN8hHdFGzkzknRiyH3cYVLkEUT8fewoerzYv"
+const contract_address_testnet = "Amgujys9e7xKhpkjy2pjz3VyCahr3F16gRAmy9YgGHRPWsUt5J4x"
+const contract_address_mainnet = "AmgEcXX3mFV2hmgYPszSC3sPn6ohjV9UaWp8cfcwKSurdH8TZmDX"
 var   contract_address
-const MIN_BLOCK_TESTNET = 83993612
-const MIN_BLOCK_MAINNET = 85586293
+const MIN_BLOCK_TESTNET = 89850123
+const MIN_BLOCK_MAINNET = 91397316
 var   min_block
 var   network_address
 const gas_price = 5  // 50000000000
